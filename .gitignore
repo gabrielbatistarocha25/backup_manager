@@ -1,0 +1,51 @@
+# Python - Arquivos compilados e cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribuição / Empacotamento
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Ambiente Virtual (NUNCA COMMITE ISSO)
+venv/
+env/
+ENV/
+.env
+.venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Mídia e Uploads (Não queremos evidências de teste no git)
+media/
+static/
+!static/.gitkeep 
+# (A linha acima diz: ignore a pasta static gerada, 
+# mas se tivermos arquivos fonte de static, manteremos em outra pasta source se houver)
+
+# IDEs e Editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Segurança e Variáveis de Ambiente
+.env
+.env.local

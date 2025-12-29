@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <div class="lg:col-span-2 space-y-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-slate-800">Clientes Ativos</h2>
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{{ clientes.count }} Total</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for cliente in clientes %}
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-700">{{ cliente.nome_fantasia }}</h3>
+                        <p class="text-xs text-gray-400 font-mono">{{ cliente.cnpj }}</p>
+                    </div>
+                    <div class="bg-slate-100 p-2 rounded-full">
+                        <i class="fa-solid fa-building text-slate-400"></i>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    <a href="{% url 'nova_validacao' cliente.id %}" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition shadow-sm hover:shadow">
+                        <i class="fa-solid fa-check-circle mr-1"></i> Validar Backup
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+                <p class="text-gray-500 col-span-2 text-center py-10">Nenhum cliente cadastrado.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
+        <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-blue-500"></i> Últimas Validações
+        </h2>
+        
+        <div class="space-y-6 relative border-l border-gray-200 ml-2">
+            {% for val in ultimas_validacoes %}
+            <div class="ml-6 relative">
+                <span class="absolute -left-[31px] top-1 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white
+                    {% if val.status == 'SUCESSO' %}bg-green-500{% elif val.status == 'ALERTA' %}bg-yellow-500{% else %}bg-red-500{% endif %}">
+                    {% if val.status == 'SUCESSO' %}
+                        <i class="fa-solid fa-check text-white text-[10px]"></i>
+                    {% elif val.status == 'ALERTA' %}
+                        <i class="fa-solid fa-exclamation text-white text-[10px]"></i>
+                    {% else %}
+                        <i class="fa-solid fa-xmark text-white text-[10px]"></i>
+                    {% endif %}
+                </span>
+
+                <div class="flex justify-between items-start">
+                    <h4 class="text-sm font-bold text-gray-900">{{ val.rotina.servidores.first.cliente.nome_fantasia }}</h4>
+                    <span class="text-xs text-gray-400">{{ val.created_at|date:"d/m H:i" }}</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">
+                    <span class="font-semibold">{{ val.rotina.ferramenta }}</span>: {{ val.rotina.descricao }}
+                </p>
+                <div class="flex justify-between items-center mt-2">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Validado por {{ val.usuario.username }}</p>
+                    {% if val.evidencia %}
+                        <a href="{{ val.evidencia.url }}" target="_blank" class="text-xs text-blue-600 hover:underline">
+                            <i class="fa-solid fa-paperclip"></i> Evidência
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+                <p class="text-gray-400 text-sm ml-6">Nenhuma atividade recente.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
