@@ -104,7 +104,7 @@
                                                 <div class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">
                                                     {{ hist.usuario.username.0|upper }}
                                                 </div>
-                                                <span class="text-xs">{{ hist.usuario.get_short_name|default:hist.usuario.username }}</span>
+                                                <span class="text-xs">{{ hist.usuario.get_full_name|default:hist.usuario.username }}</span>
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-right">

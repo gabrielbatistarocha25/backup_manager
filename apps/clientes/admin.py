@@ -1,20 +1,19 @@
 from django.contrib import admin
-from django import forms  # Necessário para configurar o widget
-from django.db import models  # Necessário para selecionar o tipo de campo
+from django import forms
+from django.db import models
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Cliente, Servidor
 
 class ServidorInline(TabularInline):
     model = Servidor
-    extra = 0  # Começa sem linhas vazias extras (limpeza visual)
+    extra = 0
     fields = ('hostname', 'ip_address', 'sistema_operacional', 'descricao')
     
-    # AQUI ESTÁ A MÁGICA DA CAIXA DE TEXTO PEQUENA
     formfield_overrides = {
         models.TextField: {
             'widget': forms.Textarea(
                 attrs={
-                    'rows': 2,  # Apenas 2 linhas de altura inicial
+                    'rows': 2, 
                     'style': 'min-height: 42px; max-height: 150px; resize: vertical;'
                 }
             )
@@ -26,6 +25,9 @@ class ClienteAdmin(ModelAdmin):
     list_display = ('nome_fantasia', 'cnpj', 'contato_tecnico', 'ativo')
     search_fields = ('nome_fantasia', 'cnpj')
     list_filter = ('ativo',)
+    
+    # AQUI: Ordenação padrão da lista por ordem alfabética
+    ordering = ('nome_fantasia',)
     
     inlines = [ServidorInline]
 
@@ -40,8 +42,9 @@ class ClienteAdmin(ModelAdmin):
         }),
     )
 
-    # AQUI INJETAMOS O CSS QUE CRIAMOS NO PASSO 1
     class Media:
+        # Mantemos os scripts de melhoria visual e confirmação que criamos antes
         css = {
             'all': ('css/admin_fixes.css',)
         }
+        js = ('js/admin_custom.js',)

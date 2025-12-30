@@ -62,7 +62,7 @@
                                 <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
                                     {{ val.usuario.username.0|upper }}
                                 </div>
-                                <span class="text-xs">{{ val.usuario.get_short_name|default:val.usuario.username }}</span>
+                                <span class="text-xs">{{ val.usuario.get_full_name|default:val.usuario.username }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-3 text-right">

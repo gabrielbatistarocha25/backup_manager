@@ -107,10 +107,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # --- CONFIGURAÇÃO VISUAL DO UNFOLD (ADMIN) ---
 # --- CONFIGURAÇÃO VISUAL DO UNFOLD (ADMIN) ---
 UNFOLD = {
-    "SITE_TITLE": "MaiLou Cloud",  # Título da aba do navegador
-    "SITE_HEADER": "MaiLou Cloud", # Título GRANDE no topo da Sidebar (Corrigido)
-    
-    "SITE_URL": None,  
+    "SITE_TITLE": "MaiLou Cloud",
+    "SITE_HEADER": "MaiLou Cloud",
+    "SITE_URL": None, # Mantemos None para não duplicar o link padrão "Início"
     
     "SITE_ICON": {
         "light": lambda request: static("img/logo-light.svg"),
@@ -132,14 +131,29 @@ UNFOLD = {
     },
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": False, 
+        "show_all_applications": False,
         "navigation": [
+            # --- NOVO BOTÃO DE VOLTAR ---
+            {
+                "title": _("Navegação"),
+                "separator": False, # Sem linha separadora para ficar colado no topo
+                "items": [
+                    {
+                        "title": _("Voltar ao Dashboard"),
+                        "icon": "keyboard_return", # Ícone de voltar
+                        "link": "/", # Link para a raiz do site (Dashboard)
+                        "permission": lambda request: True,
+                    },
+                ],
+            },
+            
+            # --- MENU EXISTENTE ---
             {
                 "title": _("Gestão de Backups"),
                 "separator": True,
                 "items": [
                     {
-                        "title": _("Dashboard"),
+                        "title": _("Dashboard Admin"), # Mudei levemente para diferenciar
                         "icon": "dashboard",
                         "link": reverse_lazy("admin:index"),
                     },

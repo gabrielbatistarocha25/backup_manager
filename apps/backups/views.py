@@ -6,6 +6,8 @@ from django.db.models.functions import Lower
 from apps.clientes.models import Cliente
 from .models import ValidacaoBackup
 from .forms import ValidacaoForm
+from django.http import JsonResponse
+from apps.clientes.models import Servidor
 
 @login_required
 def dashboard(request):
@@ -74,3 +76,16 @@ def nova_validacao(request, cliente_id):
         'form': form, 
         'cliente': cliente
     })
+
+@login_required
+def get_servidores_por_cliente(request):
+    """
+    Retorna JSON com os servidores de um cliente específico.
+    Usado no Admin para filtrar o combo de seleção.
+    """
+    cliente_id = request.GET.get('cliente_id')
+    if not cliente_id:
+        return JsonResponse({'servidores': []})
+    
+    servidores = Servidor.objects.filter(cliente_id=cliente_id).values('id', 'hostname', 'descricao')
+    return JsonResponse({'servidores': list(servidores)})
