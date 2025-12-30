@@ -4,24 +4,27 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from .models import RotinaBackup, ValidacaoBackup
 from apps.clientes.models import Cliente, Servidor
-# Importando o formulário que acabamos de ajustar
-from .forms import ValidacaoForm
+from .forms import ValidacaoForm  # Importante: Mantendo o Form seguro
 
 @login_required
 def dashboard(request):
-    clientes = Cliente.objects.filter(ativo=True).prefetch_related('servidores', 'rotinas')
+    # CORREÇÃO AQUI: Adicionado .order_by('nome_fantasia')
+    clientes = Cliente.objects.filter(ativo=True).order_by('nome_fantasia').prefetch_related('servidores', 'rotinas')
     
     for cliente in clientes:
+        # Pega a última validação de qualquer rotina deste cliente para definir o status do card
         ultima_validacao = ValidacaoBackup.objects.filter(
             rotina__cliente=cliente
         ).order_by('-created_at').first()
         
         cliente.ultimo_status = ultima_validacao.status if ultima_validacao else 'PENDENTE'
         
+        # Histórico recente para o accordion (últimas 5)
         cliente.historico_recente = ValidacaoBackup.objects.filter(
             rotina__cliente=cliente
         ).select_related('rotina', 'rotina__ferramenta', 'usuario').order_by('-created_at')[:5]
 
+    # Feed lateral (últimas 10 do sistema todo)
     ultimas_validacoes = ValidacaoBackup.objects.select_related(
         'rotina', 'rotina__ferramenta', 'rotina__cliente'
     ).order_by('-created_at')[:10]
@@ -33,6 +36,7 @@ def dashboard(request):
 
 @login_required
 def historico_global(request):
+    # Mantendo a lógica de filtros e ordenação do histórico
     validacoes = ValidacaoBackup.objects.all().select_related(
         'rotina', 'rotina__ferramenta', 'rotina__cliente', 'usuario'
     )
@@ -82,9 +86,8 @@ def historico_global(request):
 def nova_validacao(request, cliente_id):
     cliente = get_object_or_404(Cliente, pk=cliente_id)
     
-    # Lógica baseada em Formulário (Segura)
+    # Lógica baseada em Formulário (Segura e Validada)
     if request.method == 'POST':
-        # Passamos request.FILES para o form validar o arquivo
         form = ValidacaoForm(cliente_id, request.POST, request.FILES)
         
         if form.is_valid():
@@ -93,15 +96,14 @@ def nova_validacao(request, cliente_id):
             validacao.save()
             return redirect('dashboard')
     else:
-        # GET: Exibe o formulário vazio
         form = ValidacaoForm(cliente_id=cliente_id)
 
-    # Passamos rotinas também caso queira usar lógica extra no template
+    # Passamos rotinas também para caso de fallback no template
     rotinas = RotinaBackup.objects.filter(cliente=cliente)
 
     return render(request, 'nova_validacao.html', {
         'cliente': cliente,
-        'form': form,      # Importante: Passar o form para exibir erros
+        'form': form,      
         'rotinas': rotinas
     })
 

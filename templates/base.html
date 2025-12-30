@@ -6,24 +6,54 @@
     <title>Backup Manager | Enterprise</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            750: '#2d3748',
+                            850: '#1a202c',
+                            950: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        /* --- AJUSTE GLOBAL DE FONTE --- */
+        /* O padrão dos navegadores é 16px. Aumentando para 17px, 
+           todos os elementos do Tailwind (text-sm, p-4, etc) aumentam proporcionalmente. */
+        html {
+            font-size: 18px; 
+        }
+
         body { font-family: 'Inter', sans-serif; }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease-out; }
         
-        /* Animação suave para sumir o alerta */
-        .fade-out {
-            opacity: 0;
-            transition: opacity 0.5s ease-out;
+        /* Suaviza a transição de cores ao trocar o tema */
+        body, div, nav, button, input, select, textarea, span, p, h1, h2, h3, h4, table, tr, td, th {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
     </style>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col antialiased">
 
-    <nav class="bg-[#1e293b] text-white border-b border-gray-700">
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col antialiased dark:bg-slate-900 dark:text-gray-100">
+
+    <nav class="bg-[#1e293b] text-white border-b border-gray-700 dark:bg-slate-950 dark:border-slate-800">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             
             <div class="flex items-center gap-8">
@@ -44,22 +74,27 @@
                 {% endif %}
             </div>
             
-            {% if user.is_authenticated %}
             <div class="flex items-center gap-4 text-sm font-medium">
-                <span class="text-gray-300 hidden sm:inline">
-                    Olá, {{ user.get_full_name|default:user.username|title }}
-                </span>
+                <button id="theme-toggle" type="button" class="text-gray-400 hover:text-white focus:outline-none rounded-lg text-sm p-2.5 hover:bg-slate-700">
+                    <i id="theme-toggle-dark-icon" class="hidden fa-solid fa-moon"></i>
+                    <i id="theme-toggle-light-icon" class="hidden fa-solid fa-sun text-yellow-400"></i>
+                </button>
 
-                {% if user.is_staff %}
-                    <a href="{% url 'admin:index' %}" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded transition border border-slate-600" target="_blank">Admin</a>
+                {% if user.is_authenticated %}
+                    <span class="text-gray-300 hidden sm:inline border-l border-gray-600 pl-4 ml-1">
+                        Olá, {{ user.get_full_name|default:user.username|title }}
+                    </span>
+
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded transition border border-slate-600" target="_blank">Admin</a>
+                    {% endif %}
+                    
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded transition shadow-sm">Sair</button>
+                    </form>
                 {% endif %}
-                
-                <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded transition shadow-sm">Sair</button>
-                </form>
             </div>
-            {% endif %}
         </div>
     </nav>
 
@@ -68,8 +103,9 @@
             <div id="toast-container" class="mb-6 space-y-2 max-w-4xl mx-auto fixed top-20 right-6 left-6 md:left-auto md:w-96 z-50">
             {% for message in messages %}
                 <div class="toast-message p-4 rounded-lg text-sm font-medium border-l-4 shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-0
-                    {% if message.tags == 'success' %}bg-white text-green-700 border-green-500 ring-1 ring-green-100
-                    {% else %}bg-white text-red-700 border-red-500 ring-1 ring-red-100{% endif %}">
+                    dark:bg-slate-800 dark:text-gray-200
+                    {% if message.tags == 'success' %}bg-white text-green-700 border-green-500 ring-1 ring-green-100 dark:border-green-600 dark:ring-green-900
+                    {% else %}bg-white text-red-700 border-red-500 ring-1 ring-red-100 dark:border-red-600 dark:ring-red-900{% endif %}">
                     
                     <div class="flex items-center gap-2">
                         {% if message.tags == 'success' %}
@@ -80,7 +116,7 @@
                         <span>{{ message }}</span>
                     </div>
 
-                    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition focus:outline-none">
+                    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition focus:outline-none">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -91,24 +127,57 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-6 text-center text-gray-400 text-xs">
+    <footer class="bg-white border-t border-gray-200 py-6 text-center text-gray-400 text-xs dark:bg-slate-950 dark:border-slate-800 dark:text-gray-500">
         &copy; 2026 MaiLou.Cloud
     </footer>
 
     <script>
+        // Ícones
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Verifica estado inicial para mostrar ícone correto
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        var themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            // Alterna ícones
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            // Se existe preferência salva
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                // Se não existe, baseia no sistema
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+
+        // Script do Toast (Mensagens)
         document.addEventListener('DOMContentLoaded', function() {
             const toasts = document.querySelectorAll('.toast-message');
-            
             toasts.forEach(toast => {
-                // Configura o timer para 5 segundos (5000ms)
                 setTimeout(() => {
-                    // Adiciona classe de fade-out
                     toast.classList.add('opacity-0', 'translate-y-[-10px]');
-                    
-                    // Remove do DOM após a transição visual terminar
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 300); // Espera 300ms da animação CSS
+                    setTimeout(() => toast.remove(), 300);
                 }, 5000);
             });
         });

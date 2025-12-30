@@ -7,28 +7,40 @@ class ValidacaoForm(forms.ModelForm):
         fields = ['rotina', 'status', 'observacao', 'evidencia']
         
         widgets = {
-            # RadioSelect permite que a gente renderize as opções como botões no template
+            # Status como RadioSelect para os botões grandes
             'status': forms.RadioSelect(attrs={'class': 'peer sr-only'}),
-            'observacao': forms.Textarea(attrs={'rows': 3}),
+            
+            'observacao': forms.Textarea(attrs={
+                'rows': 3,
+                'class': (
+                    'block p-2.5 w-full text-sm rounded-lg border transition duration-150 ease-in-out '
+                    'text-gray-900 bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 '
+                    'dark:bg-slate-800 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                ),
+                'placeholder': 'Descreva qualquer anomalia encontrada...'
+            }),
+            
+            # AQUI ESTÁ A VALIDAÇÃO DO NAVEGADOR (Extensão)
+            'evidencia': forms.FileInput(attrs={
+                'class': 'hidden',
+                'id': 'file-upload',
+                'accept': '.txt,.jpg,.jpeg,.png'  # <--- Garante que o navegador filtre os arquivos
+            }),
         }
-
+    
     def __init__(self, cliente_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # 1. Filtra as rotinas apenas do cliente atual
         if cliente_id:
             self.fields['rotina'].queryset = RotinaBackup.objects.filter(cliente_id=cliente_id)
             
-        # 2. Estilização do Campo Rotina (Dropdown)
+        self.fields['rotina'].empty_label = "Selecione uma rotina..."
+        
+        # Estilo Dark Mode para o Select
         self.fields['rotina'].widget.attrs.update({
-            'class': 'w-full appearance-none rounded-lg border-gray-300 bg-gray-50 p-3 pr-8 focus:border-blue-500 focus:ring-blue-500 transition cursor-pointer'
-        })
-        self.fields['rotina'].empty_label = "Selecione a rotina na lista..."
-
-        # 3. Estilização do Campo Evidência (Input Oculto para funcionar com Drag & Drop)
-        self.fields['evidencia'].widget.attrs.update({
-            'class': 'hidden',
-            'id': 'file-upload',
-            # Mantemos o accept para ajudar o navegador, mas a segurança real é no backend (validators.py)
-            'accept': '.txt,.jpg,.jpeg,.png'
+            'class': (
+                'w-full appearance-none rounded-lg border p-3 pr-8 transition cursor-pointer '
+                'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 '
+                'dark:bg-slate-800 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+            )
         })
