@@ -13,24 +13,29 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 text-red-700 p-4 border-b border-red-100 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" class="p-8 space-y-6">
             {% csrf_token %}
 
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-2">Qual rotina você verificou?</label>
                 <div class="relative">
-                    <select name="rotina" required class="w-full appearance-none rounded-lg border-gray-300 bg-gray-50 p-3 pr-8 focus:border-blue-500 focus:ring-blue-500 transition cursor-pointer">
-                        <option value="" disabled selected>Selecione a rotina na lista...</option>
-                        {% for rotina in rotinas %}
-                        <option value="{{ rotina.id }}">
-                            {{ rotina.ferramenta.nome }} - {{ rotina.descricao }} ({{ rotina.frequencia }})
-                        </option>
-                        {% endfor %}
-                    </select>
+                    {{ form.rotina }}
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                         <i class="fa-solid fa-chevron-down text-xs"></i>
                     </div>
                 </div>
+                {% if form.rotina.errors %}
+                    <p class="mt-1 text-xs text-red-600 font-bold">{{ form.rotina.errors.0 }}</p>
+                {% endif %}
+                
                 {% if not rotinas %}
                 <div class="mt-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 flex items-center gap-2">
                     <i class="fa-solid fa-circle-exclamation"></i>
@@ -41,9 +46,14 @@
 
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-3">Qual foi o resultado?</label>
+                
+                {% if form.status.errors %}
+                    <p class="mt-1 text-xs text-red-600 font-bold mb-2">{{ form.status.errors.0 }}</p>
+                {% endif %}
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <label class="cursor-pointer relative group">
-                        <input type="radio" name="status" value="SUCESSO" class="peer sr-only" required>
+                        <input type="radio" name="status" value="SUCESSO" class="peer sr-only" {% if form.status.value == 'SUCESSO' %}checked{% endif %} required>
                         <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-green-50 hover:border-green-200 transition-all peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-700">
                             <i class="fa-solid fa-circle-check text-2xl mb-2 text-gray-300 group-hover:text-green-500 peer-checked:text-green-600 transition-colors"></i>
                             <span class="font-bold text-sm">Sucesso</span>
@@ -51,7 +61,7 @@
                     </label>
 
                     <label class="cursor-pointer relative group">
-                        <input type="radio" name="status" value="ALERTA" class="peer sr-only">
+                        <input type="radio" name="status" value="ALERTA" class="peer sr-only" {% if form.status.value == 'ALERTA' %}checked{% endif %}>
                         <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-yellow-50 hover:border-yellow-200 transition-all peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:text-yellow-700">
                             <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-gray-300 group-hover:text-yellow-500 peer-checked:text-yellow-600 transition-colors"></i>
                             <span class="font-bold text-sm">Alerta</span>
@@ -59,7 +69,7 @@
                     </label>
 
                     <label class="cursor-pointer relative group">
-                        <input type="radio" name="status" value="ERRO" class="peer sr-only">
+                        <input type="radio" name="status" value="ERRO" class="peer sr-only" {% if form.status.value == 'ERRO' %}checked{% endif %}>
                         <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 transition-all peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700">
                             <i class="fa-solid fa-circle-xmark text-2xl mb-2 text-gray-300 group-hover:text-red-500 peer-checked:text-red-600 transition-colors"></i>
                             <span class="font-bold text-sm">Erro</span>
@@ -70,19 +80,34 @@
 
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-2">Observações (Opcional)</label>
-                <textarea name="observacao" rows="3" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Descreva algum detalhe relevante, código de erro ou ação tomada..."></textarea>
+                <textarea name="observacao" rows="3" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Descreva algum detalhe relevante...">{{ form.observacao.value|default:'' }}</textarea>
             </div>
 
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-2">Evidência (Print ou Log)</label>
-                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <i class="fa-solid fa-cloud-arrow-up text-gray-400 text-xl mb-2"></i>
-                        <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Clique para enviar</span> ou arraste o arquivo</p>
-                        <p class="text-xs text-gray-400">PNG, JPG ou LOG</p>
+                
+                <label for="file-upload" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition relative overflow-hidden group">
+                    
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="drop-content">
+                        <i class="fa-solid fa-cloud-arrow-up text-gray-400 text-xl mb-2 group-hover:text-blue-500 transition"></i>
+                        <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Clique para enviar</span> ou arraste</p>
+                        <p class="text-xs text-gray-400">PNG, JPG, TXT (Máx 5MB)</p>
                     </div>
-                    <input name="evidencia" type="file" class="hidden" />
+                    
+                    <div id="file-name-display" class="hidden absolute inset-0 bg-blue-50 flex flex-col items-center justify-center text-blue-700">
+                        <i class="fa-solid fa-file-circle-check text-2xl mb-1"></i>
+                        <span id="filename-text" class="text-sm font-medium"></span>
+                    </div>
+
+                    {{ form.evidencia }}
                 </label>
+
+                {% if form.evidencia.errors %}
+                <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100 flex items-center gap-2 animate-pulse">
+                    <i class="fa-solid fa-shield-virus"></i>
+                    {{ form.evidencia.errors.0 }}
+                </div>
+                {% endif %}
             </div>
 
             <div class="pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
@@ -96,4 +121,14 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            document.getElementById('drop-content').classList.add('hidden');
+            document.getElementById('file-name-display').classList.remove('hidden');
+            document.getElementById('filename-text').textContent = e.target.files[0].name;
+        }
+    });
+</script>
 {% endblock %}
