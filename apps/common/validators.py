@@ -5,26 +5,37 @@ from django.core.exceptions import ValidationError
 
 def validate_file_infection(file):
     """
-    Valida o tipo real do arquivo (MIME sniffing) para prevenir
-    uploads maliciosos renomeados (ex: exe renomeado para jpg).
+    Valida tamanho, extensão e tipo real (MIME) do arquivo.
     """
-    valid_mime_types = [
-        'image/jpeg', 'image/png', 'application/pdf', 'text/plain'
+    # 1. Configurações
+    MAX_SIZE_MB = 5
+    VALID_MIME_TYPES = [
+        'image/jpeg', 
+        'image/png', 
+        'text/plain'
     ]
-    
-    # Lê os primeiros 2KB para identificar o cabeçalho (magic number)
-    file_header = file.read(2048)
-    file_mime_type = magic.from_buffer(file_header, mime=True)
-    file.seek(0) # Retorna o cursor para o início
+    VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.txt']
 
-    if file_mime_type not in valid_mime_types:
-        raise ValidationError(f"Tipo de arquivo não permitido: {file_mime_type}. Use PDF, Imagem ou TXT.")
+    # 2. Validação de Tamanho
+    if file.size > MAX_SIZE_MB * 1024 * 1024:
+        raise ValidationError(f"O arquivo é muito grande ({file.size/1024/1024:.1f}MB). O limite máximo é {MAX_SIZE_MB}MB.")
+
+    # 3. Validação de Extensão
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in VALID_EXTENSIONS:
+        raise ValidationError("Extensão não permitida. Use apenas: .txt, .jpg ou .png")
+
+    # 4. Validação de Conteúdo Real (Magic Numbers)
+    # Lê o início do arquivo para garantir que não é um .exe renomeado
+    initial_pos = file.tell()
+    file.seek(0)
+    mime_type = magic.from_buffer(file.read(2048), mime=True)
+    file.seek(initial_pos) # Reseta o ponteiro do arquivo
+
+    if mime_type not in VALID_MIME_TYPES:
+        raise ValidationError(f"Conteúdo do arquivo inválido ({mime_type}). Envie apenas Logs de texto ou Imagens.")
 
 def evidence_upload_path(instance, filename):
-    """
-    Renomeia o arquivo para um UUID mantendo a extensão.
-    Evita Path Traversal e sobrescrita de arquivos.
-    """
     ext = filename.split('.')[-1]
     filename = f"{uuid.uuid4()}.{ext}"
     return os.path.join('evidencias/', filename)

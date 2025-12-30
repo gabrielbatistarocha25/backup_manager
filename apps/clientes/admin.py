@@ -1,16 +1,25 @@
 from django.contrib import admin
+from django import forms  # Necessário para configurar o widget
+from django.db import models  # Necessário para selecionar o tipo de campo
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Cliente, Servidor
 
 class ServidorInline(TabularInline):
     model = Servidor
-    extra = 0 # Mudei para 0 para não ficar criando linhas vazias sem necessidade
-    
-    # Definimos explicitamente os campos. 
-    # Ao remover o 'show_change_link', o título duplicado sumirá.
+    extra = 0  # Começa sem linhas vazias extras (limpeza visual)
     fields = ('hostname', 'ip_address', 'sistema_operacional', 'descricao')
     
-    # IMPORTANTE: Removida a linha 'show_change_link = True' que causava a duplicação.
+    # AQUI ESTÁ A MÁGICA DA CAIXA DE TEXTO PEQUENA
+    formfield_overrides = {
+        models.TextField: {
+            'widget': forms.Textarea(
+                attrs={
+                    'rows': 2,  # Apenas 2 linhas de altura inicial
+                    'style': 'min-height: 42px; max-height: 150px; resize: vertical;'
+                }
+            )
+        },
+    }
 
 @admin.register(Cliente)
 class ClienteAdmin(ModelAdmin):
@@ -30,3 +39,9 @@ class ClienteAdmin(ModelAdmin):
             "classes": ("tab-panel",),
         }),
     )
+
+    # AQUI INJETAMOS O CSS QUE CRIAMOS NO PASSO 1
+    class Media:
+        css = {
+            'all': ('css/admin_fixes.css',)
+        }

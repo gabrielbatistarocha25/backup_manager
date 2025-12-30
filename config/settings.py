@@ -105,12 +105,15 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- CONFIGURAÇÃO VISUAL DO UNFOLD (ADMIN) ---
+# --- CONFIGURAÇÃO VISUAL DO UNFOLD (ADMIN) ---
 UNFOLD = {
-    "SITE_TITLE": "MaiLou Cloud Admin",
-    "SITE_HEADER": "MaiLou Cloud",
-    "SITE_URL": "/",
+    "SITE_TITLE": "MaiLou Cloud",  # Título da aba do navegador
+    "SITE_HEADER": "MaiLou Cloud", # Título GRANDE no topo da Sidebar (Corrigido)
+    
+    "SITE_URL": None,  
+    
     "SITE_ICON": {
-        "light": lambda request: static("img/logo-light.svg"),  # Você pode colocar logo depois
+        "light": lambda request: static("img/logo-light.svg"),
         "dark": lambda request: static("img/logo-dark.svg"),
     },
     "COLORS": {
@@ -129,7 +132,7 @@ UNFOLD = {
     },
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,
+        "show_all_applications": False, 
         "navigation": [
             {
                 "title": _("Gestão de Backups"),
@@ -142,7 +145,7 @@ UNFOLD = {
                     },
                     {
                         "title": _("Validações Realizadas"),
-                        "icon": "verified",  # Icone Material Design
+                        "icon": "verified",
                         "link": reverse_lazy("admin:backups_validacaobackup_changelist"),
                     },
                     {
