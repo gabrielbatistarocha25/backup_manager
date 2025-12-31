@@ -168,7 +168,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:backups_rotinabackup_changelist"),
                     },
                     {
-                        "title": _("Ferramentas"),
+                        "title": _("Ferramentas de Backup"),
                         "icon": "build",
                         "link": reverse_lazy("admin:backups_ferramentabackup_changelist"),
                     },

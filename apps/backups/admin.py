@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group
-from django.utils.timezone import localtime # Importante para o fuso horário
+from django.utils.timezone import localtime
 from unfold.admin import ModelAdmin
 from .models import FerramentaBackup, RotinaBackup, ValidacaoBackup
 from apps.clientes.models import Cliente, Servidor 
@@ -31,10 +31,16 @@ class RotinaBackupForm(forms.ModelForm):
         model = RotinaBackup
         fields = '__all__'
         widgets = {
-            # Widget customizado para o Time Picker (Relógio)
+            # CORREÇÃO DO MODO ESCURO AQUI:
+            # Adicionei classes 'dark:...' para inverter as cores quando o tema escuro estiver ativo.
             'horario_execucao': forms.TextInput(
                 attrs={
-                    'class': 'time-picker-custom border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-white',
+                    'class': (
+                        'time-picker-custom border border-gray-300 text-gray-900 text-sm rounded-lg '
+                        'focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 '
+                        'bg-white '  # Cor Light (Fundo Branco)
+                        'dark:bg-slate-800 dark:border-slate-600 dark:text-white dark:focus:border-blue-500' # Cor Dark (Fundo Escuro)
+                    ),
                     'placeholder': 'Selecione a hora...'
                 }
             ),
@@ -99,7 +105,7 @@ class ValidacaoBackupAdmin(ModelAdmin):
             'rotina', 'rotina__ferramenta', 'usuario', 'editado_por'
         ).prefetch_related('rotina__servidores__cliente')
 
-    # Badge Colorido de Status (com suporte a Dark Mode)
+    # Badge Colorido de Status (com suporte a Dark Mode já configurado)
     def get_status_badge(self, obj):
         colors = {
             'SUCESSO': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-700',
@@ -144,7 +150,7 @@ class ValidacaoBackupAdmin(ModelAdmin):
         )
     get_usuario_avatar.short_description = 'Validador'
 
-    # --- CAMPO AUDITORIA CORRIGIDO (ESPAÇAMENTO E DATA LOCAL) ---
+    # --- CAMPO AUDITORIA (Mantido com suporte a Dark Mode) ---
     def get_edit_info(self, obj):
         # Exibe se tiver editor OU se passou mais de 60s da criação
         if obj.editado_por or (obj.updated_at - obj.created_at).total_seconds() > 60:

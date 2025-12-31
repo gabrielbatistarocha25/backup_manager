@@ -7,6 +7,11 @@ from apps.clientes.models import Cliente, Servidor
 
 class FerramentaBackup(models.Model):
     nome = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        # AQUI: Nome da 1ª opção
+        verbose_name = "Ferramenta de Backup"
+        verbose_name_plural = "Ferramentas de Backup"
     
     def __str__(self):
         return self.nome
@@ -28,8 +33,13 @@ class RotinaBackup(TimeStampedModel):
     servidores = models.ManyToManyField(Servidor, related_name='rotinas', verbose_name="Servidores")
     
     frequencia = models.CharField(max_length=20, choices=FREQUENCIA_CHOICES, verbose_name="Frequência")
-    horario_execucao = models.TimeField()
-    retencao_dias = models.IntegerField()
+    horario_execucao = models.TimeField(verbose_name="Horário de Execução")
+    retencao_dias = models.IntegerField(verbose_name="Retenção (dias)")
+
+    class Meta:
+        # AQUI: Nome da 2ª opção
+        verbose_name = "Rotina de Backup"
+        verbose_name_plural = "Rotinas de Backup"
     
     def __str__(self):
         return f"{self.ferramenta} - {self.descricao}"
