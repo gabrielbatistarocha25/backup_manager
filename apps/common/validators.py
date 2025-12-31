@@ -2,6 +2,8 @@ import os
 import uuid
 import magic
 from django.core.exceptions import ValidationError
+import re
+from django.core.exceptions import ValidationError
 
 def validate_file_infection(file):
     """
@@ -39,3 +41,4 @@ def evidence_upload_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = f"{uuid.uuid4()}.{ext}"
     return os.path.join('evidencias/', filename)
+

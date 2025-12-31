@@ -2,17 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from apps.common.models import TimeStampedModel
 from apps.common.validators import evidence_upload_path, validate_file_infection
-# Importando o modelo Cliente para criar a chave estrangeira
 from apps.clientes.models import Cliente, Servidor
 
 class FerramentaBackup(models.Model):
     nome = models.CharField(max_length=50, unique=True)
-
+    
     class Meta:
-        # AQUI: Nome da 1ª opção
         verbose_name = "Ferramenta de Backup"
         verbose_name_plural = "Ferramentas de Backup"
-    
+
     def __str__(self):
         return self.nome
 
@@ -23,24 +21,30 @@ class RotinaBackup(TimeStampedModel):
         ('MENSAL', 'Mensal'),
     ]
 
-    # NOVO CAMPO: Vincula a rotina ao cliente
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='rotinas', null=True, blank=True)
-    
     ferramenta = models.ForeignKey(FerramentaBackup, on_delete=models.PROTECT, verbose_name="Ferramenta")
-    descricao = models.CharField(max_length=200, verbose_name="Descrição")
     
-    # Servidores continuam aqui, mas serão filtrados pelo cliente acima
+    # Ajustei o verbose_name para ficar mais intuitivo
+    descricao = models.CharField(max_length=200, verbose_name="Nome da Rotina")
+    
+    # --- NOVO CAMPO SOLICITADO ---
+    conteudo = models.CharField(
+        max_length=255,
+        verbose_name="O que está sendo copiado?",
+        help_text="Ex: Servidor Completo, Pasta de Dados, Banco SQL, C:/Arquivos...",
+        default="Servidor Completo"
+    )
+    # -----------------------------
+
     servidores = models.ManyToManyField(Servidor, related_name='rotinas', verbose_name="Servidores")
-    
     frequencia = models.CharField(max_length=20, choices=FREQUENCIA_CHOICES, verbose_name="Frequência")
     horario_execucao = models.TimeField(verbose_name="Horário de Execução")
     retencao_dias = models.IntegerField(verbose_name="Retenção (dias)")
-
+    
     class Meta:
-        # AQUI: Nome da 2ª opção
         verbose_name = "Rotina de Backup"
         verbose_name_plural = "Rotinas de Backup"
-    
+
     def __str__(self):
         return f"{self.ferramenta} - {self.descricao}"
 
@@ -72,8 +76,8 @@ class ValidacaoBackup(TimeStampedModel):
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = "Validação de Backup"
-        verbose_name_plural = "Validações de Backup"
+        verbose_name = "Validação Realizada"
+        verbose_name_plural = "Validações Realizadas"
 
     def __str__(self):
         return f"Validação {self.id} - {self.status}"
