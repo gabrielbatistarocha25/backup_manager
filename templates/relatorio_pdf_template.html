@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { size: A4 landscape; margin: 1cm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; }
+        h1 { color: #1e293b; border-bottom: 2px solid #334155; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #f1f5f9; color: #0f172a; padding: 8px; text-align: left; border-bottom: 1px solid #cbd5e1; font-size: 11px; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+        .status-sucesso { color: #166534; font-weight: bold; }
+        .status-alerta { color: #ca8a04; font-weight: bold; }
+        .status-erro { color: #991b1b; font-weight: bold; }
+        .footer { position: fixed; bottom: 0; right: 0; font-size: 8px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Validação de Backups</h1>
+    <p>Gerado em: {{ data_geracao|date:"d/m/Y H:i" }} | Usuário: {{ usuario }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Servidor</th>
+                <th>Ferramenta</th>
+                <th>Rotina</th>
+                <th>Status</th>
+                <th>Responsável</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in validacoes %}
+            <tr>
+                <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ item.rotina.servidores.first.cliente.nome_fantasia|default:"-" }}</td>
+                <td>{{ item.rotina.servidores.first.hostname|default:"-" }}</td>
+                <td>{{ item.rotina.ferramenta.nome }}</td>
+                <td>{{ item.rotina.descricao }}</td>
+                <td>
+                    <span class="status-{{ item.status|lower }}">
+                        {{ item.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ item.usuario.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
