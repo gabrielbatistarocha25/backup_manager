@@ -115,6 +115,11 @@ UNFOLD = {
         "light": lambda request: static("img/logo-light.svg"),
         "dark": lambda request: static("img/logo-dark.svg"),
     },
+
+    "SCRIPTS": [
+        lambda request: static("js/admin_password.js"),
+    ],
+
     "COLORS": {
         "primary": {
             "50": "239 246 255",

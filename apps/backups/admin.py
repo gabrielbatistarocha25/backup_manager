@@ -14,7 +14,14 @@ admin.site.unregister(Group)
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin, ModelAdmin):
-    pass
+    # Configuração estável para criação de usuários
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2'),
+            'description': 'Primeiro, insira um nome de usuário e uma senha. Depois, você poderá editar mais opções e permissões do usuário.',
+        }),
+    )
 
 @admin.register(Group)
 class GroupAdmin(ModelAdmin):
@@ -86,7 +93,6 @@ class ValidacaoBackupAdmin(ModelAdmin):
         return super().get_queryset(request).select_related('rotina', 'rotina__ferramenta', 'usuario', 'editado_por').prefetch_related('rotina__servidores__cliente')
 
     def get_status_badge(self, obj):
-        # Aqui definimos as cores E o font-weight: 700 (Bold) forçado
         custom_css = """
         <style>
             .dark .badge-custom-sucesso { background-color: #1b3636 !important; color: #3aa868 !important; border-color: #166534 !important; font-weight: 700 !important; }
