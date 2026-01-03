@@ -1,0 +1,18 @@
+# Framework Principal
+Django>=5.0
+
+# Interface Administrativa (Tema)
+django-unfold
+
+# Geração de Relatórios
+openpyxl
+xhtml2pdf
+
+# Manipulação de Imagens (Necessário para xhtml2pdf e ImageField do Django)
+Pillow
+
+# Utilitários de Fuso Horário (Recomendado para Django moderno)
+tzdata
+
+# PostgreSQL
+psycopg2-binary
