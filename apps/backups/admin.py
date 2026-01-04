@@ -14,7 +14,6 @@ admin.site.unregister(Group)
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin, ModelAdmin):
-    # Configuração estável para criação de usuários
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -22,6 +21,11 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
             'description': 'Primeiro, insira um nome de usuário e uma senha. Depois, você poderá editar mais opções e permissões do usuário.',
         }),
     )
+
+    class Media:
+        css = {
+            'all': ('css/admin_password_fix.css',)
+        }
 
 @admin.register(Group)
 class GroupAdmin(ModelAdmin):
